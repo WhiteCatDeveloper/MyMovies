@@ -1,5 +1,10 @@
 package com.demo.mymovies.utils;
 
+import android.net.Uri;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class NetworkUtils {
 
     private static final String BASE_URL = "https://api.themoviedb.org/3/discover/movie";
@@ -16,4 +21,25 @@ public class NetworkUtils {
 
     public static final int POPULARITY = 0;
     public static final int TOP_RATED = 1;
+
+    public static URL buildURL(int sortBy, int page) {
+        URL result = null;
+        String methodOfSort;
+        if (sortBy == POPULARITY) {
+            methodOfSort = SORT_BY_POPULARITY;
+        } else methodOfSort = SORT_BY_TOP_RATED;
+        Uri uri = Uri.parse(BASE_URL).buildUpon()
+                .appendQueryParameter(PARAMS_API_KEY, API_KEY)
+                .appendQueryParameter(PARAMS_LANGUAGE, LANGUAGE_VALUE)
+                .appendQueryParameter(PARAMS_SORT_BY, methodOfSort)
+                .appendQueryParameter(PARAMS_PAGE, String.valueOf(page))
+                .build();
+
+        try {
+            result = new URL(uri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }
