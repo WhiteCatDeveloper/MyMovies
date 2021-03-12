@@ -1,9 +1,18 @@
 package com.demo.mymovies.utils;
 
 import android.net.Uri;
+import android.os.AsyncTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 public class NetworkUtils {
 
@@ -22,7 +31,7 @@ public class NetworkUtils {
     public static final int POPULARITY = 0;
     public static final int TOP_RATED = 1;
 
-    public static URL buildURL(int sortBy, int page) {
+    private static URL buildURL(int sortBy, int page) {
         URL result = null;
         String methodOfSort;
         if (sortBy == POPULARITY) {
@@ -41,5 +50,43 @@ public class NetworkUtils {
             e.printStackTrace();
         }
         return result;
+    }
+
+    public static JSONObject getJSONFromNetwork (int sortBy, int page) {
+        URL url = buildURL(sortBy, page);
+        JSONObject result = null;
+        try {
+            result = new JSONLoadTask().execute(url).get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private static class JSONLoadTask extends AsyncTask<URL, Void, JSONObject> {
+        @Override
+        protected JSONObject doInBackground(URL... urls) {
+            JSONObject result = null;
+            if (urls == null || urls.length == 0) {
+                return result;
+            }
+            HttpURLConnection urlConnection = null;
+            try {
+                urlConnection = (HttpURLConnection)urls[0].openConnection();
+                InputStreamReader inputStreamReader = new InputStreamReader(urlConnection.getInputStream());
+                BufferedReader reader = new BufferedReader(inputStreamReader);
+                StringBuilder builder = new StringBuilder();
+                String line = reader.readLine();
+                while (line != null) {
+                    builder.append(line);
+                }
+                result = new JSONObject(builder.toString());
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            } finally {
+                if (urlConnection != null) urlConnection.disconnect();
+            }
+            return result;
+        }
     }
 }

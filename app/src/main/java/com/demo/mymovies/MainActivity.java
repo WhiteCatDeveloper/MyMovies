@@ -3,8 +3,11 @@ package com.demo.mymovies;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.demo.mymovies.utils.NetworkUtils;
+
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -14,8 +17,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        String url = NetworkUtils.buildURL(NetworkUtils.POPULARITY, 1).toString();
-        Log.i("RESULT", url);
+        JSONObject jsonObject = NetworkUtils.getJSONFromNetwork(NetworkUtils.TOP_RATED, 3);
+        Log.e("JSON", jsonObject.toString());
+        if (jsonObject == null) {
+            Toast.makeText(this, "error", Toast.LENGTH_LONG).show();
+        } else Toast.makeText(this, "succesful", Toast.LENGTH_LONG).show();
+
     }
 
 
